@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>注册 - 个人博客系统</title>
+    <style>
+        /* 基础样式复位 - 与首页及登录页完全统一 */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f0f2f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            color: #333;
+        }
+
+        /* 注册卡片容器 */
+        .form-container {
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        }
+
+        h2 {
+            margin-bottom: 25px;
+            text-align: center;
+            color: #1a1a1a;
+            font-size: 1.6rem;
+            letter-spacing: 1px;
+        }
+
+        /* 输入框样式优化 */
+        input {
+            width: 100%;
+            padding: 12px 15px;
+            margin-bottom: 20px;
+            border: 1px solid #dadce0;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: all 0.3s;
+            outline: none;
+        }
+        input:focus {
+            border-color: #1a73e8;
+            box-shadow: 0 0 0 3px rgba(26,115,232,0.1);
+        }
+
+        /* 按钮样式优化 - 统一使用蓝色主题 */
+        button {
+            width: 100%;
+            padding: 12px;
+            background: #1a73e8;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            transition: background 0.3s, transform 0.1s;
+        }
+        button:hover {
+            background: #1557b0;
+        }
+        button:active {
+            transform: scale(0.98);
+        }
+
+        /* 错误提示样式 */
+        .error {
+            background: #fde8e8;
+            color: #c81e1e;
+            padding: 10px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            font-size: 13px;
+            text-align: center;
+            border: 1px solid #f8b4b4;
+        }
+
+        /* 底部链接组 */
+        .link-group {
+            text-align: center;
+            margin-top: 25px;
+            font-size: 14px;
+            color: #5f6368;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+        .link-group a {
+            color: #1a73e8;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+        .link-group a:hover {
+            text-decoration: underline;
+            color: #1557b0;
+        }
+        .divider {
+            color: #dadce0;
+        }
+    </style>
+</head>
+<body>
+<div class="form-container">
+    <h2>创建账号</h2>
+
+    <!-- 错误消息提醒 -->
+    <div class="error" th:if="${error}" th:text="${error}">
+        注册信息有误，请重试
+    </div>
+
+    <form method="post" action="/register">
+        <input type="text" name="username" placeholder="请设置用户名" required autocomplete="username">
+        <input type="password" name="password" placeholder="请设置密码" required autocomplete="new-password">
+        <button type="submit">立即注册</button>
+    </form>
+
+    <div class="link-group">
+        <a href="/login">已有账号？去登录</a>
+        <span class="divider">|</span>
+        <a href="/">返回首页</a>
+    </div>
+</div>
+</body>
+</html>

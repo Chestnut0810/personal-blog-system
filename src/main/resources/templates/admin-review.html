@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <title>文章审核 - 管理后台</title>
+    <style>
+        /* 基础样式复位 - 与全局保持一致 */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f0f2f5;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        /* 导航栏样式 - 与首页完全统一 */
+        .header {
+            background: #ffffff;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            padding: 0 20px;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+        .header-content {
+            max-width: 1000px;
+            margin: 0 auto;
+            height: 70px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .header h1 a {
+            font-size: 1.5rem;
+            color: #1a73e8;
+            text-decoration: none;
+        }
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        .header a {
+            color: #5f6368;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+        .header a:hover { color: #1a73e8; }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding-left: 15px;
+            border-left: 1px solid #eee;
+        }
+        .username-tag {
+            background: #fce8e6; /* 管理员使用微红色调区分 */
+            color: #d93025;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 13px;
+            font-weight: bold;
+        }
+
+        /* 容器布局 */
+        .container {
+            max-width: 1000px;
+            margin: 40px auto;
+            padding: 30px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .list-title {
+            margin-bottom: 25px;
+            font-size: 1.4rem;
+            color: #1a1a1a;
+            display: flex;
+            align-items: center;
+        }
+        .list-title::before {
+            content: "";
+            width: 4px;
+            height: 22px;
+            background: #d93025; /* 审核页面使用警告色线条 */
+            margin-right: 12px;
+            border-radius: 2px;
+        }
+
+        /* 表格样式美化 */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        th {
+            background: #f8f9fa;
+            color: #5f6368;
+            font-weight: 600;
+            text-align: left;
+            padding: 15px;
+            border-bottom: 2px solid #eee;
+            font-size: 14px;
+        }
+        td {
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+            font-size: 15px;
+            vertical-align: middle;
+        }
+        tr:hover {
+            background-color: #fafafa;
+        }
+        td a {
+            color: #1a73e8;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        td a:hover {
+            text-decoration: underline;
+        }
+
+        /* 按钮样式优化 */
+        .btn-group {
+            display: flex;
+            gap: 8px;
+        }
+        button {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        .approve {
+            background: #34a853;
+            color: white;
+        }
+        .approve:hover {
+            background: #2d8e47;
+            box-shadow: 0 2px 6px rgba(52,168,83,0.3);
+        }
+        .reject {
+            background: #ea4335;
+            color: white;
+        }
+        .reject:hover {
+            background: #d93025;
+            box-shadow: 0 2px 6px rgba(234,67,53,0.3);
+        }
+
+        /* 空状态提示 */
+        .empty-row {
+            text-align: center;
+            color: #999;
+            padding: 40px !important;
+        }
+    </style>
+</head>
+<body>
+<div class="header">
+    <div class="header-content">
+        <h1><a href="/">个人博客系统</a></h1>
+        <nav class="nav-links">
+            <a href="/">首页</a>
+            <div class="user-info">
+                <span class="username-tag" th:text="${user.username}">管理员</span>
+                <a href="/logout">退出</a>
+            </div>
+        </nav>
+    </div>
+</div>
+
+<div class="container">
+    <h2 class="list-title">待审核文章管理</h2>
+
+    <table>
+        <thead>
+        <tr>
+            <th style="width: 40%;">文章标题</th>
+            <th>作者</th>
+            <th>提交时间</th>
+            <th style="text-align: center;">管理操作</th>
+        </tr>
+        </thead>
+        <tbody>
+        <!-- 循环渲染待审核文章 -->
+        <tr th:each="article : ${articles}">
+            <td>
+                <a th:href="@{/articles/{id}(id=${article.id})}" th:text="${article.title}">文章标题内容</a>
+            </td>
+            <td>
+                <span style="color: #666;" th:text="${article.authorName}">作者名</span>
+            </td>
+            <td>
+                <span style="color: #888; font-size: 13px;" th:text="${#temporals.format(article.createdAt, 'yyyy-MM-dd HH:mm')}">2023-01-01</span>
+            </td>
+            <td style="text-align: center;">
+                <div class="btn-group">
+                    <form th:action="@{/admin/approve/{id}(id=${article.id})}" method="post">
+                        <button type="submit" class="approve">通过</button>
+                    </form>
+                    <form th:action="@{/admin/reject/{id}(id=${article.id})}" method="post">
+                        <button type="submit" class="reject">驳回</button>
+                    </form>
+                </div>
+            </td>
+        </tr>
+
+        <!-- 列表为空时的显示 -->
+        <tr th:if="${#lists.isEmpty(articles)}">
+            <td colspan="4" class="empty-row">☕ 暂无需要审核的文章</td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+</body>
+</html>

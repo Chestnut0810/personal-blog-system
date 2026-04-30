@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>个人博客系统</title>
+    <style>
+        /* 基础样式复位 */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f0f2f5;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        /* 导航栏优化 */
+        .header {
+            background: #ffffff;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            padding: 0 20px;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+        .header-content {
+            max-width: 1000px;
+            margin: 0 auto;
+            height: 70px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .header h1 {
+            font-size: 1.5rem;
+            color: #1a73e8;
+        }
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        .header a {
+            color: #5f6368;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+        .header a:hover { color: #1a73e8; }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding-left: 15px;
+            border-left: 1px solid #eee;
+        }
+        .username-tag {
+            background: #e8f0fe;
+            color: #1967d2;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 13px;
+        }
+
+        /* 主体内容布局 */
+        .container {
+            max-width: 1000px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+        .list-title {
+            margin-bottom: 25px;
+            font-size: 1.25rem;
+            color: #1a1a1a;
+            display: flex;
+            align-items: center;
+        }
+        .list-title::before {
+            content: "";
+            width: 4px;
+            height: 20px;
+            background: #1a73e8;
+            margin-right: 10px;
+            border-radius: 2px;
+        }
+
+        /* 文章卡片优化 */
+        .article {
+            background: white;
+            padding: 25px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .article:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .article h2 { margin-bottom: 12px; }
+        .article h2 a {
+            color: #1a1a1a;
+            text-decoration: none;
+            font-size: 1.4rem;
+        }
+        .article h2 a:hover { color: #1a73e8; }
+
+        .article .meta {
+            color: #70757a;
+            font-size: 13px;
+            margin-bottom: 15px;
+            display: flex;
+            gap: 15px;
+        }
+        .article p {
+            color: #4d5156;
+            font-size: 15px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-line-clamp: 3; /* 自动截断显示3行 */
+            -webkit-box-orient: vertical;
+        }
+
+        /* 空状态提示 */
+        .empty-msg {
+            text-align: center;
+            padding: 50px;
+            background: white;
+            border-radius: 8px;
+            color: #999;
+        }
+    </style>
+</head>
+<body>
+<div class="header">
+    <div class="header-content">
+        <h1>个人博客系统</h1>
+        <nav class="nav-links">
+            <a href="/">首页</a>
+            <!-- 已登录状态 -->
+            <span th:if="${user}" class="nav-links">
+                <a href="/articles/my">我的文章</a>
+                <a href="/articles/new">发布文章</a>
+                <a th:if="${user.role == 'ADMIN'}" href="/admin/review" style="color: #d93025;">审核文章</a>
+                <span class="user-info">
+                    <span class="username-tag" th:text="${user.username}"></span>
+                    <a href="/logout">退出</a>
+                </span>
+            </span>
+            <!-- 未登录状态 -->
+            <span th:unless="${user}" class="nav-links">
+                <a href="/login">登录</a>
+                <a href="/register" style="background: #1a73e8; color: white; padding: 6px 16px; border-radius: 4px;">注册</a>
+            </span>
+        </nav>
+    </div>
+</div>
+
+<div class="container">
+    <h2 class="list-title">最新文章</h2>
+
+    <!-- 文章列表循环 -->
+    <div th:each="article : ${articles}" class="article">
+        <h2>
+            <a th:href="@{/articles/{id}(id=${article.id})}" th:text="${article.title}">文章标题</a>
+        </h2>
+        <div class="meta">
+            <span>👤 作者: <span th:text="${article.authorName}"></span></span>
+            <span>📅 发布于: <span th:text="${#temporals.format(article.createdAt, 'yyyy-MM-dd HH:mm')}"></span></span>
+        </div>
+        <p th:text="${#strings.abbreviate(article.content, 200)}">文章摘要内容...</p>
+    </div>
+
+    <!-- 无文章时的显示 -->
+    <div th:if="${#lists.isEmpty(articles)}" class="empty-msg">
+        <p>📭 暂无文章发布</p>
+    </div>
+</div>
+</body>
+</html>

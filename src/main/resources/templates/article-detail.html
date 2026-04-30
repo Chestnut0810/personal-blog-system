@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <title th:text="${article.title}">文章详情 - 个人博客系统</title>
+    <style>
+        /* 基础样式复位 - 全局统一 */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f0f2f5;
+            color: #333;
+            line-height: 1.8; /* 提高正文阅读体验 */
+        }
+
+        /* 导航栏 - 与首页完全统一 */
+        .header {
+            background: #ffffff;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            padding: 0 20px;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+        .header-content {
+            max-width: 1000px;
+            margin: 0 auto;
+            height: 70px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .header h1 a {
+            font-size: 1.5rem;
+            color: #1a73e8;
+            text-decoration: none;
+        }
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        .header a {
+            color: #5f6368;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+        .header a:hover { color: #1a73e8; }
+
+        /* 内容容器 */
+        .container {
+            max-width: 900px;
+            margin: 40px auto;
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        /* 文章头部 */
+        .article-header {
+            border-bottom: 1px solid #eee;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+        }
+        .article-title {
+            font-size: 2.2rem;
+            color: #1a1a1a;
+            line-height: 1.3;
+            margin-bottom: 15px;
+        }
+        .article-meta {
+            color: #70757a;
+            font-size: 14px;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+        .status-tag {
+            background: #e8f0fe;
+            color: #1967d2;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        /* 正文内容 */
+        .article-content {
+            font-size: 17px;
+            color: #3c4043;
+            white-space: pre-wrap;
+            margin-bottom: 40px;
+            min-height: 200px;
+        }
+
+        /* 作者/管理操作区 */
+        .admin-actions {
+            background: #f8f9fa;
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 40px;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+        .btn-edit {
+            color: #1a73e8;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .btn-delete {
+            background: #fce8e6;
+            color: #d93025;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .btn-delete:hover { background: #fad2cf; }
+
+        /* 评论区样式 */
+        .section-title {
+            font-size: 1.3rem;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+        }
+        .section-title::before {
+            content: "";
+            width: 4px;
+            height: 18px;
+            background: #1a73e8;
+            margin-right: 10px;
+            border-radius: 2px;
+        }
+        .comment {
+            padding: 20px 0;
+            border-bottom: 1px solid #f1f1f1;
+        }
+        .comment p { font-size: 15px; color: #3c4043; margin-bottom: 8px; }
+        .comment .meta { font-size: 13px; color: #888; }
+
+        /* 评论表单 */
+        .comment-form { margin-top: 30px; }
+        .comment-form textarea {
+            width: 100%;
+            height: 120px;
+            padding: 15px;
+            border: 1px solid #dadce0;
+            border-radius: 8px;
+            font-family: inherit;
+            resize: vertical;
+            margin-bottom: 15px;
+            outline: none;
+            transition: border 0.3s;
+        }
+        .comment-form textarea:focus { border-color: #1a73e8; }
+        .btn-submit {
+            padding: 10px 24px;
+            background: #1a73e8;
+            color: white;
+            border:none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+        }
+        .btn-submit:hover { background: #1557b0; }
+
+        .login-tip {
+            background: #fff7e6;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            color: #d48806;
+            border: 1px solid #ffe58f;
+        }
+    </style>
+</head>
+<body>
+<div class="header">
+    <div class="header-content">
+        <h1><a href="/">个人博客系统</a></h1>
+        <nav class="nav-links">
+            <a href="/">首页</a>
+            <!-- 用户已登录 -->
+            <span th:if="${user}" class="nav-links">
+                <a href="/articles/my">我的文章</a>
+                <a href="/articles/new">发布文章</a>
+                <a th:if="${user.role == 'ADMIN'}" href="/admin/review" style="color: #d93025;">审核文章</a>
+                <span style="color: #dadce0;">|</span>
+                <span style="color: #1a73e8; font-weight: bold;" th:text="${user.username}"></span>
+                <a href="/logout">退出</a>
+            </span>
+            <!-- 用户未登录 -->
+            <span th:unless="${user}" class="nav-links">
+                <a href="/login">登录</a>
+                <a href="/register">注册</a>
+            </span>
+        </nav>
+    </div>
+</div>
+
+<div class="container">
+    <!-- 文章内容区 -->
+    <div class="article-header">
+        <h1 class="article-title" th:text="${article.title}">文章标题</h1>
+        <div class="article-meta">
+            <span>👤 作者: <span th:text="${article.authorName}"></span></span>
+            <span>📅 <span th:text="${#temporals.format(article.createdAt, 'yyyy-MM-dd HH:mm')}"></span></span>
+            <span class="status-tag" th:text="${article.status}">STATUS</span>
+        </div>
+    </div>
+
+    <div class="article-content" th:text="${article.content}">
+        这里是文章的正文内容...
+    </div>
+
+    <!-- 作者或管理员的操作按钮 -->
+    <div class="admin-actions" th:if="${user != null and (user.id == article.authorId or user.role == 'ADMIN')}">
+        <span style="font-size: 14px; color: #666; margin-right: auto;">管理选项：</span>
+        <a class="btn-edit" th:href="@{/articles/edit/{id}(id=${article.id})}">📝 编辑文章</a>
+        <form th:action="@{/articles/delete/{id}(id=${article.id})}" method="post" style="display:inline;">
+            <button type="submit" class="btn-delete" onclick="return confirm('确定要永久删除该文章吗？')">🗑️ 删除</button>
+        </form>
+    </div>
+
+    <!-- 评论区 -->
+    <h3 class="section-title">评论反馈</h3>
+    <div class="comments-list">
+        <div th:each="comment : ${comments}" class="comment">
+            <p th:text="${comment.content}">评论内容</p>
+            <div class="meta">
+                <strong th:text="${comment.username}">用户名</strong>
+                <span style="margin: 0 8px;">•</span>
+                <span th:text="${#temporals.format(comment.createdAt, 'yyyy-MM-dd HH:mm')}">时间</span>
+            </div>
+        </div>
+        <div th:if="${#lists.isEmpty(comments)}" style="text-align: center; color: #999; padding: 30px;">
+            还没有评论，快来抢沙发吧~
+        </div>
+    </div>
+
+    <!-- 发表评论表单 -->
+    <div class="comment-form" th:if="${user != null}">
+        <form th:action="@{/articles/{id}/comment(id=${article.id})}" method="post">
+            <textarea name="content" required placeholder="写下你的见解..."></textarea>
+            <div style="text-align: right;">
+                <button type="submit" class="btn-submit">发表评论</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- 未登录提示 -->
+    <div class="login-tip" th:if="${user == null}">
+        💡 想参与讨论？请先 <a href="/login" style="color: #1a73e8; font-weight: bold;">登录</a> 账户。
+    </div>
+</div>
+</body>
+</html>
